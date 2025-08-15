@@ -17,122 +17,28 @@ class UserManager {
 
   // PROBLEMA: Acceso directo a la base de datos sin abstracción
   async createUser(userData: CreateUserDto): Promise<User> {
-    return new Promise((resolve, reject) => {
-      const now = new Date();
-      const user: User = {
-        name: userData.name,
-        email: userData.email,
-        age: userData.age,
-        createdAt: now,
-        updatedAt: now
-      };
-
-      this.db.run(
-        'INSERT INTO users (name, email, age, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)',
-        [user.name, user.email, user.age, user.createdAt.toISOString(), user.updatedAt.toISOString()],
-        function(err) {
-          if (err) {
-            reject(err);
-            return;
-          }
-          user.id = this.lastID;
-          resolve(user);
-        }
-      );
-    });
+   
   }
 
   // PROBLEMA: Código duplicado para acceso a datos
   async getUserById(id: number): Promise<User | null> {
-    return new Promise((resolve, reject) => {
-      this.db.get(
-        'SELECT * FROM users WHERE id = ?',
-        [id],
-        (err, row) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          if (!row) {
-            resolve(null);
-            return;
-          }
-          resolve({
-            id: row.id,
-            name: row.name,
-            email: row.email,
-            age: row.age,
-            createdAt: new Date(row.createdAt),
-            updatedAt: new Date(row.updatedAt)
-          });
-        }
-      );
-    });
+    
   }
 
   // PROBLEMA: Más código duplicado
   async getAllUsers(): Promise<User[]> {
-    return new Promise((resolve, reject) => {
-      this.db.all(
-        'SELECT * FROM users ORDER BY createdAt DESC',
-        (err, rows) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          const users: User[] = rows.map(row => ({
-            id: row.id,
-            name: row.name,
-            email: row.email,
-            age: row.age,
-            createdAt: new Date(row.createdAt),
-            updatedAt: new Date(row.updatedAt)
-          }));
-          resolve(users);
-        }
-      );
-    });
+   
   }
 
   // PROBLEMA: Lógica de negocio mezclada con acceso a datos
   async updateUser(id: number, userData: UpdateUserDto): Promise<User | null> {
-    const user = await this.getUserById(id);
-    if (!user) {
-      return null;
-    }
-
-    const updatedUser = { ...user, ...userData, updatedAt: new Date() };
-
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        'UPDATE users SET name = ?, email = ?, age = ?, updatedAt = ? WHERE id = ?',
-        [updatedUser.name, updatedUser.email, updatedUser.age, updatedUser.updatedAt.toISOString(), id],
-        function(err) {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(updatedUser);
-        }
-      );
-    });
+  
+  
   }
 
   // PROBLEMA: No hay transacciones para operaciones complejas
   async deleteUser(id: number): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        'DELETE FROM users WHERE id = ?',
-        [id],
-        function(err) {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(this.changes > 0);
-        }
-      );
-    });
+   
   }
 
   // PROBLEMA: Operación compleja sin transacciones
