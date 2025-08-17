@@ -5,8 +5,7 @@ import sqlite3 from 'sqlite3';
 
 
 export class UserRepository implements IUserRepository {
-  private readonly db: sqlite3.Database;
-  constructor() {
+  constructor(private db: sqlite3.Database) {
     const database = new Database();
     this.db = database.getDatabase()
   }
