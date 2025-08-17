@@ -40,22 +40,24 @@ export class UserService implements IUserService {
     toUserId: number
   ): Promise<boolean> {
     try {
-      const fromUser = await this.unitOfWork.users.findById(fromUserId);
-      const toUser = await this.unitOfWork.users.findById(toUserId);
+      return this.unitOfWork.executeInTransaction(async () => {
+        const fromUser = await this.unitOfWork.users.findById(fromUserId);
+        const toUser = await this.unitOfWork.users.findById(toUserId);
 
-      if (!fromUser || !toUser) {
-        throw Error("Uno o ambos usuarios no existen");
-      }
+        if (!fromUser || !toUser) {
+          throw Error("Uno o ambos usuarios no existen");
+        }
 
-      // PROBLEMA: Si falla aquí, los datos quedan inconsistentes
-      await this.unitOfWork.users.update(toUserId, {
-        name: fromUser.name,
-        email: fromUser.email,
-        age: fromUser.age,
+        // PROBLEMA: Si falla aquí, los datos quedan inconsistentes
+        await this.unitOfWork.users.update(toUserId, {
+          name: fromUser.name,
+          email: fromUser.email,
+          age: fromUser.age,
+        });
+
+        await this.deleteUser(fromUserId);
+        return true;
       });
-
-      await this.deleteUser(fromUserId);
-      return true;
     } catch (error) {
       console.error("Error en transferencia:", error);
       return false;
